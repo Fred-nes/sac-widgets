@@ -194,12 +194,14 @@
      *     einfachen Schwelle (value <= 1) nicht unterscheidbar.
      */
     onCustomWidgetDataChanged() {
-      try {
-        const binding = this.dataBindings?.getDataBinding("myDataBinding");
-        if (!binding) return;
+    console.log("WinRateDonut: onCustomWidgetDataChanged aufgerufen");
+    try {
+    const binding = this.dataBindings?.getDataBinding("myDataBinding");
+    console.log("WinRateDonut: binding =", binding);
 
-        const resultSet = binding.getResultSet();
-        if (!resultSet) { this._showNoData(true); return; }
+    const resultSet = binding?.getResultSet();
+    console.log("WinRateDonut: resultSet =", resultSet);
+    console.log("WinRateDonut: resultSet keys =", resultSet ? Object.keys(resultSet)
 
         // [1] Zeilenarray holen
         let rows;
