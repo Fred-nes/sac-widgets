@@ -1,0 +1,74 @@
+{
+  "id": "com.custom.winrate.donut",
+  "version": "1.0.0",
+  "name": "Customer Win Rate Donut",
+  "description": "Displays customer win rate as an animated donut chart with KPI label.",
+  "vendor": "Custom",
+  "eula": "",
+  "license": "",
+  "newInstancePrefix": "WinRateDonut",
+  "imports": [],
+  "webcomponents": [
+    {
+      "kind": "main",
+      "tag": "com-custom-winrate-donut",
+      "url": "/main.js",
+      "integrity": "",
+      "ignoreIntegrity": true
+    }
+  ],
+  "properties": {
+    "winRate": {
+      "type": "number",
+      "default": 38,
+      "description": "Win Rate in percent (0-100). Overridden automatically when dataBindings is connected."
+    },
+    "label": {
+      "type": "string",
+      "default": "Customer Win Rate",
+      "description": "Title label shown above the chart"
+    },
+    "sourceLabel": {
+      "type": "string",
+      "default": "SAP Sales Cloud",
+      "description": "Data source label shown below the chart"
+    },
+    "color": {
+      "type": "string",
+      "default": "#185FA5",
+      "description": "Primary color for the filled arc"
+    }
+  },
+  "dataBindings": {
+    "myDataBinding": {
+      "feeds": [
+        {
+          "id": "measures",
+          "description": "Win Rate Measure (0-100)",
+          "type": "mainStructureMember"
+        },
+        {
+          "id": "dimensions",
+          "description": "Optional dimension (e.g. Sales Org)",
+          "type": "dimension"
+        }
+      ]
+    }
+  },
+  "methods": {
+    "setWinRate": {
+      "description": "Set win rate value programmatically from a SAC script",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "number"
+        }
+      ]
+    }
+  },
+  "events": {
+    "onClick": {
+      "description": "Fired when the widget is clicked"
+    }
+  }
+}
