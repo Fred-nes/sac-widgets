@@ -1,28 +1,6 @@
 /**
  * SAC Custom Widget – Customer Win Rate Donut
  * Tag: com-custom-winrate-donut
- *
- * Data Binding:
- *   myDataBinding → feeds: measures (1 Measure, 0-100), dimensions (optional)
- *   SAC liest den ersten Measure-Wert aus und setzt ihn automatisch als winRate.
- *
- * Properties (auch manuell im Builder setzbar):
- *   winRate     {float}   0–100, default 38
- *   label       {string}  Titeltext
- *   sourceLabel {string}  Quellenangabe
- *   color       {string}  Hex-Farbe für den gefüllten Bogen
- *
- * Method:
- *   setWinRate(value) – Wert per Script setzen
- *
- * Event:
- *   onClick – beim Klick auf das Widget
- *
- * Fixes vs. v1.0.0:
- *   [1] ResultSet: getData() statt .data[], kompatibel mit SAC Widget SDK 2.x
- *   [2] Measure-Erkennung: Metadata-basiert, Dimension-Keys werden explizit ausgeschlossen
- *   [3] Decimal-Heuristik entfernt — Modell muss 0-100 liefern (dokumentiert)
- *   [4] onCustomWidgetResize: Donut und Schriftgröße passen sich an Widget-Größe an
  */
 
 (function () {
@@ -68,24 +46,20 @@
         gap: 14px;
         width: 100%;
       }
-      /* [4] Font-Größe via CSS-Variable, gesetzt durch onCustomWidgetResize */
       .big-num {
-        font-size: var(--wr-num-size, 28px);
+        font-size: 28px;
         font-weight: 700;
         color: #1a1a1a;
         line-height: 1;
-        min-width: 48px;
-        transition: font-size 0.2s ease;
+        min-width: 56px;
       }
-      /* [4] Donut-Größe via CSS-Variable, gesetzt durch onCustomWidgetResize */
       .donut-wrap {
         position: relative;
-        width: var(--wr-donut-size, 56px);
-        height: var(--wr-donut-size, 56px);
+        width: 56px;
+        height: 56px;
         flex-shrink: 0;
-        transition: width 0.2s ease, height 0.2s ease;
       }
-      .donut-wrap svg { width: 100%; height: 100%; }
+      .donut-wrap svg { width: 56px; height: 56px; }
       .arc-bg { fill: none; stroke: #e8e8e8; stroke-width: 9; }
       .arc-fill {
         fill: none;
@@ -149,8 +123,6 @@
       });
     }
 
-    /* ─── SAC Lifecycle ─── */
-
     onCustomWidgetBeforeUpdate(oChangedProperties) {}
 
     onCustomWidgetAfterUpdate(oChangedProperties) {
@@ -160,113 +132,40 @@
       if ("color"       in oChangedProperties) this.color       = oChangedProperties.color;
     }
 
-    /**
-     * [4] SAC ruft diese Methode bei jeder Größenänderung im Builder auf.
-     * Donut-Größe und Schrift skalieren stufenlos mit der Widget-Breite.
-     */
-    onCustomWidgetResize(width, height) {
-      const card = this._shadowRoot.getElementById("card");
-      // Donut: 20–80px, ca. 25% der Widget-Breite
-      const donutPx = Math.min(80, Math.max(20, Math.round(width * 0.25)));
-      // Zahl: 16–32px, ca. 12% der Widget-Breite
-      const numPx   = Math.min(32, Math.max(16, Math.round(width * 0.12)));
-      card.style.setProperty("--wr-donut-size", `${donutPx}px`);
-      card.style.setProperty("--wr-num-size",   `${numPx}px`);
-    }
-
-    /**
-     * [1] + [2] + [3]: Data Binding lesen
-     *
-     * [1] getData() statt .data[]:
-     *     SAC SDK 2.x liefert Zeilen über getData(), nicht als .data-Property.
-     *     Fallback auf .data für ältere SDK-Versionen vorhanden.
-     *
-     * [2] Measure-Key via Metadata:
-     *     getMetadata() liefert welche Feed-IDs Measures sind.
-     *     Dimension-Keys werden explizit ausgeschlossen, damit numerische Dim-Werte
-     *     (z.B. Jahr "2024", Org-ID "1010") nicht fälschlich als Win Rate gelesen werden.
-     *     Fallback: erster nicht-Dimension-Key mit numerischem Wert.
-     *
-     * [3] Decimal-Heuristik entfernt:
-     *     Der Wert wird 1:1 übernommen. Das Analytics Model muss den Measure
-     *     als 0–100 konfigurieren, nicht als 0–1.
-     *     Grund: 1% (0.01 dezimal) und 100% (1.0 dezimal) sind mit einer
-     *     einfachen Schwelle (value <= 1) nicht unterscheidbar.
-     */
+    // FIX: this.dataBinding.myDataBinding statt this.dataBindings.getDataBinding()
     onCustomWidgetDataChanged() {
-    console.log("WinRateDonut: onCustomWidgetDataChanged aufgerufen");
-    try {
-    const binding = this.dataBindings?.getDataBinding("myDataBinding");
-    console.log("WinRateDonut: binding =", binding);
+      try {
+        const binding = this.dataBinding && this.dataBinding.myDataBinding;
+        if (!binding) return;
 
-    const resultSet = binding?.getResultSet();
-    console.log("WinRateDonut: resultSet =", resultSet);
-    console.log("WinRateDonut: resultSet keys =", resultSet ? Object.keys(resultSet)
-
-        // [1] Zeilenarray holen
-        let rows;
-        if (typeof resultSet.getData === "function") {
-          rows = resultSet.getData();
-        } else if (Array.isArray(resultSet.data)) {
-          rows = resultSet.data;
+        const resultSet = binding.getResultSet();
+        if (!resultSet || !resultSet.data || resultSet.data.length === 0) {
+          this._showNoData(true);
+          return;
         }
 
-        if (!rows || rows.length === 0) { this._showNoData(true); return; }
-
-        // [2a] Dimension- und Measure-IDs aus Metadata lesen
-        let dimensionIds = new Set();
-        let measureIds   = [];
-        if (typeof resultSet.getMetadata === "function") {
-          const meta = resultSet.getMetadata();
-          const dimFeed = meta?.feeds?.dimensions;
-          if (Array.isArray(dimFeed)) {
-            dimFeed.forEach(d => dimensionIds.add(typeof d === "string" ? d : (d?.id ?? "")));
-          }
-          const mFeed = meta?.feeds?.measures;
-          if (Array.isArray(mFeed)) {
-            measureIds = mFeed.map(m => typeof m === "string" ? m : (m?.id ?? ""));
-          }
-        }
-
-        const firstRow = rows[0];
+        const firstRow = resultSet.data[0];
+        const keys = Object.keys(firstRow);
         let value = null;
-
-        // [2b] Bekannte Measure-IDs zuerst probieren
-        for (const id of measureIds) {
-          const cell = firstRow[id] ?? firstRow[id.toLowerCase()];
-          if (cell === undefined || cell === null) continue;
-          // SAC liefert cells als Objekt {rawValue, formattedValue} oder direkt als Zahl
-          const raw = (typeof cell === "object") ? (cell.rawValue ?? cell.raw ?? cell.value) : cell;
+        for (const k of keys) {
+          const raw = firstRow[k] && firstRow[k].raw !== undefined
+            ? firstRow[k].raw
+            : firstRow[k];
           const num = parseFloat(raw);
           if (!isNaN(num)) { value = num; break; }
         }
 
-        // [2c] Fallback: erster Key der kein Dimension-Key ist
-        if (value === null) {
-          for (const k of Object.keys(firstRow)) {
-            if (dimensionIds.has(k)) continue;
-            const cell = firstRow[k];
-            const raw  = (typeof cell === "object" && cell !== null)
-              ? (cell.rawValue ?? cell.raw ?? cell.value)
-              : cell;
-            const num  = parseFloat(raw);
-            if (!isNaN(num)) { value = num; break; }
-          }
-        }
-
         if (value !== null) {
           this._showNoData(false);
-          this.winRate = value; // [3] kein * 100 — Model liefert 0-100
+          if (value > 0 && value <= 1) value = value * 100;
+          this.winRate = value;
         } else {
           this._showNoData(true);
         }
       } catch (e) {
         console.error("WinRateDonut: Fehler beim Lesen des Data Bindings", e);
-        this._showNoData(true); // Fehler sichtbar machen, nicht lautlos schlucken
       }
     }
-
-    /* ─── Properties ─── */
 
     get winRate() { return this._winRate; }
     set winRate(val) {
@@ -294,15 +193,11 @@
       this._shadowRoot.getElementById("arc").style.stroke = val;
     }
 
-    /* ─── Method ─── */
-
     setWinRate(value) { this.winRate = value; }
-
-    /* ─── Intern ─── */
 
     _updateArc(percent) {
       const arc = this._shadowRoot.getElementById("arc");
-      const circumference = 2 * Math.PI * 21; // r=21 → ~131.95
+      const circumference = 2 * Math.PI * 21;
       const offset = circumference * (1 - percent / 100);
       arc.style.strokeDasharray  = circumference.toFixed(2);
       arc.style.strokeDashoffset = offset.toFixed(2);
