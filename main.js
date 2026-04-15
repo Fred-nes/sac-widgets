@@ -88,7 +88,7 @@
   } catch (e) {
     console.error("WinRateDonut data error", e);
   }
-};
+  };
 
   WinRateDonut.prototype.onCustomWidgetAfterUpdate = function (changed) {
     if (!this._root) return;
