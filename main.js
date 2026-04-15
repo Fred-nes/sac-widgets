@@ -60,7 +60,35 @@
     this._render();
   };
 
-  WinRateDonut.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
+  WinRateDonut.prototype.onCustomWidgetDataChanged = function () {
+  console.log("=== DATA CHANGED CALLED ===");
+  if (!this._root) { console.log("NO ROOT"); return; }
+  try {
+    console.log("dataBinding object:", this.dataBinding);
+    var binding = this.dataBinding && this.dataBinding.myDataBinding;
+    console.log("binding:", binding);
+    if (!binding) { console.log("NO BINDING"); return; }
+    var rs = binding.getResultSet();
+    console.log("resultSet:", JSON.stringify(rs));
+    if (!rs || !rs.data || rs.data.length === 0) { this._showNoData(true); return; }
+    var row  = rs.data[0];
+    var keys = Object.keys(row);
+    var val  = null;
+    for (var i = 0; i < keys.length; i++) {
+      var cell = row[keys[i]];
+      var raw  = (cell && cell.raw !== undefined) ? cell.raw : cell;
+      var n    = parseFloat(raw);
+      if (!isNaN(n)) { val = n; break; }
+    }
+    if (val === null) { this._showNoData(true); return; }
+    if (val > 0 && val <= 1) val = val * 100;
+    this._rate = Math.min(100, Math.max(0, val));
+    this._showNoData(false);
+    this._render();
+  } catch (e) {
+    console.error("WinRateDonut data error", e);
+  }
+};
 
   WinRateDonut.prototype.onCustomWidgetAfterUpdate = function (changed) {
     if (!this._root) return;
