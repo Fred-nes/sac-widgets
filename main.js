@@ -44,12 +44,12 @@
     this._root = this.attachShadow({ mode: "open" });
     this._root.appendChild(tmpl.content.cloneNode(true));
 
-    this._rate    = 38;
-    this._title   = "Opportunity Win Rate";
-    this._arcColor      = "#185FA5";
-    this._bgColor       = "#ffffff";
-    this._fontSize      = 32;
-    this._threshold     = 30;
+    this._rate           = 38;
+    this._title          = "Opportunity Win Rate";
+    this._arcColor       = "#185FA5";
+    this._bgColor        = "#ffffff";
+    this._fontSize       = 32;
+    this._threshold      = 30;
     this._thresholdColor = "#e53935";
 
     var self = this;
@@ -60,91 +60,63 @@
     this._render();
   };
 
-  WinRateDonut.prototype.onCustomWidgetDataChanged = function () {
-  console.log("=== DATA CHANGED CALLED ===");
-  if (!this._root) { console.log("NO ROOT"); return; }
-  try {
-    console.log("dataBinding object:", this.dataBinding);
-    var binding = this.dataBinding && this.dataBinding.myDataBinding;
-    console.log("binding:", binding);
-    if (!binding) { console.log("NO BINDING"); return; }
-    var rs = binding.getResultSet();
-    console.log("resultSet:", JSON.stringify(rs));
-    if (!rs || !rs.data || rs.data.length === 0) { this._showNoData(true); return; }
-    var row  = rs.data[0];
-    var keys = Object.keys(row);
-    var val  = null;
-    for (var i = 0; i < keys.length; i++) {
-      var cell = row[keys[i]];
-      var raw  = (cell && cell.raw !== undefined) ? cell.raw : cell;
-      var n    = parseFloat(raw);
-      if (!isNaN(n)) { val = n; break; }
-    }
-    if (val === null) { this._showNoData(true); return; }
-    if (val > 0 && val <= 1) val = val * 100;
-    this._rate = Math.min(100, Math.max(0, val));
-    this._showNoData(false);
-    this._render();
-  } catch (e) {
-    console.error("WinRateDonut data error", e);
-  }
-  };
+  WinRateDonut.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
 
   WinRateDonut.prototype.onCustomWidgetAfterUpdate = function (changed) {
     if (!this._root) return;
-    if ("title"          in changed) { this._title          = changed.title;          this._root.getElementById("lbl").textContent = changed.title; }
-    if ("arcColor"       in changed) { this._arcColor       = changed.arcColor;       }
-    if ("bgColor"        in changed) { this._bgColor        = changed.bgColor;        this._root.getElementById("card").style.backgroundColor = changed.bgColor; }
-    if ("fontSize"       in changed) { this._fontSize       = changed.fontSize;       this._root.getElementById("kpi").style.fontSize = changed.fontSize + "px"; }
-    if ("threshold"      in changed) { this._threshold      = changed.threshold;      }
+    if ("title"          in changed) { this._title          = changed.title; }
+    if ("arcColor"       in changed) { this._arcColor       = changed.arcColor; }
+    if ("bgColor"        in changed) { this._bgColor        = changed.bgColor; }
+    if ("fontSize"       in changed) { this._fontSize       = changed.fontSize; }
+    if ("threshold"      in changed) { this._threshold      = changed.threshold; }
     if ("thresholdColor" in changed) { this._thresholdColor = changed.thresholdColor; }
     this._render();
   };
 
   WinRateDonut.prototype.onCustomWidgetDataChanged = function () {
-  console.log("=== DATA CHANGED CALLED ===");
-  if (!this._root) { console.log("NO ROOT"); return; }
-  try {
-    console.log("dataBinding object:", this.dataBinding);
-    var binding = this.dataBinding && this.dataBinding.myDataBinding;
-    console.log("binding:", binding);
-    if (!binding) { console.log("NO BINDING"); return; }
-    var rs = binding.getResultSet();
-    console.log("resultSet:", JSON.stringify(rs));
-    if (!rs || !rs.data || rs.data.length === 0) { this._showNoData(true); return; }
-    var row  = rs.data[0];
-    var keys = Object.keys(row);
-    var val  = null;
-    for (var i = 0; i < keys.length; i++) {
-      var cell = row[keys[i]];
-      var raw  = (cell && cell.raw !== undefined) ? cell.raw : cell;
-      var n    = parseFloat(raw);
-      if (!isNaN(n)) { val = n; break; }
+    console.log("=== DATA CHANGED CALLED ===");
+    if (!this._root) { console.log("NO ROOT"); return; }
+    try {
+      console.log("dataBinding object:", this.dataBinding);
+      var binding = this.dataBinding && this.dataBinding.myDataBinding;
+      console.log("binding:", binding);
+      if (!binding) { console.log("NO BINDING"); return; }
+      var rs = binding.getResultSet();
+      console.log("resultSet:", JSON.stringify(rs));
+      if (!rs || !rs.data || rs.data.length === 0) { this._showNoData(true); return; }
+      var row  = rs.data[0];
+      var keys = Object.keys(row);
+      var val  = null;
+      for (var i = 0; i < keys.length; i++) {
+        var cell = row[keys[i]];
+        var raw  = (cell && cell.raw !== undefined) ? cell.raw : cell;
+        var n    = parseFloat(raw);
+        if (!isNaN(n)) { val = n; break; }
+      }
+      if (val === null) { this._showNoData(true); return; }
+      if (val > 0 && val <= 1) val = val * 100;
+      this._rate = Math.min(100, Math.max(0, val));
+      this._showNoData(false);
+      this._render();
+    } catch (e) {
+      console.error("WinRateDonut data error", e);
     }
-    if (val === null) { this._showNoData(true); return; }
-    if (val > 0 && val <= 1) val = val * 100;
-    this._rate = Math.min(100, Math.max(0, val));
-    this._showNoData(false);
-    this._render();
-  } catch (e) {
-    console.error("WinRateDonut data error", e);
-  }
-};
+  };
 
   WinRateDonut.prototype._render = function () {
     if (!this._root) return;
-    var rate  = this._rate;
-    var color = (rate < this._threshold) ? this._thresholdColor : this._arcColor;
-    var circ  = 2 * Math.PI * 30;
+    var rate   = this._rate;
+    var color  = (rate < this._threshold) ? this._thresholdColor : this._arcColor;
+    var circ   = 2 * Math.PI * 30;
     var offset = circ * (1 - rate / 100);
-    var arc = this._root.getElementById("arc-fill");
+    var arc    = this._root.getElementById("arc-fill");
     arc.setAttribute("stroke-dasharray",  circ.toFixed(2));
     arc.setAttribute("stroke-dashoffset", offset.toFixed(2));
     arc.setAttribute("stroke", color);
-    this._root.getElementById("kpi").textContent = Math.round(rate) + "%";
-    this._root.getElementById("kpi").style.fontSize = this._fontSize + "px";
-    this._root.getElementById("kpi").style.color = color;
-    this._root.getElementById("lbl").textContent = this._title;
+    this._root.getElementById("kpi").textContent      = Math.round(rate) + "%";
+    this._root.getElementById("kpi").style.fontSize   = this._fontSize + "px";
+    this._root.getElementById("kpi").style.color      = color;
+    this._root.getElementById("lbl").textContent      = this._title;
     this._root.getElementById("card").style.backgroundColor = this._bgColor;
   };
 
