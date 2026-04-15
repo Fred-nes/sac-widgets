@@ -15,8 +15,8 @@
     "</style>" +
     "<div class='card' id='card'>" +
     "<div class='donut-wrap'>" +
-    "<svg id='svg' viewBox='0 0 80 80' width='80' height='80'>" +
-    "<circle id='arc-bg' cx='40' cy='40' r='30' fill='none' stroke='#e0e0e0' stroke-width='10'/>" +
+    "<svg viewBox='0 0 80 80' width='80' height='80'>" +
+    "<circle cx='40' cy='40' r='30' fill='none' stroke='#e0e0e0' stroke-width='10'/>" +
     "<circle id='arc-fill' cx='40' cy='40' r='30' fill='none' stroke='#185FA5' stroke-width='10'" +
     " stroke-linecap='round' stroke-dasharray='188.5' stroke-dashoffset='116'" +
     " transform='rotate(-90 40 40)'" +
@@ -39,6 +39,7 @@
   WinRateDonut.prototype.constructor = WinRateDonut;
 
   WinRateDonut.prototype.connectedCallback = function () {
+    console.log("=== CONNECTED CALLBACK ===", this._init);
     if (this._init) return;
     this._init = true;
     this._root = this.attachShadow({ mode: "open" });
@@ -60,9 +61,12 @@
     this._render();
   };
 
-  WinRateDonut.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
+  WinRateDonut.prototype.onCustomWidgetBeforeUpdate = function (changed) {
+    console.log("=== BEFORE UPDATE ===", changed);
+  };
 
   WinRateDonut.prototype.onCustomWidgetAfterUpdate = function (changed) {
+    console.log("=== AFTER UPDATE ===", changed);
     if (!this._root) return;
     if ("title"          in changed) { this._title          = changed.title; }
     if ("arcColor"       in changed) { this._arcColor       = changed.arcColor; }
@@ -113,10 +117,10 @@
     arc.setAttribute("stroke-dasharray",  circ.toFixed(2));
     arc.setAttribute("stroke-dashoffset", offset.toFixed(2));
     arc.setAttribute("stroke", color);
-    this._root.getElementById("kpi").textContent      = Math.round(rate) + "%";
-    this._root.getElementById("kpi").style.fontSize   = this._fontSize + "px";
-    this._root.getElementById("kpi").style.color      = color;
-    this._root.getElementById("lbl").textContent      = this._title;
+    this._root.getElementById("kpi").textContent           = Math.round(rate) + "%";
+    this._root.getElementById("kpi").style.fontSize        = this._fontSize + "px";
+    this._root.getElementById("kpi").style.color           = color;
+    this._root.getElementById("lbl").textContent           = this._title;
     this._root.getElementById("card").style.backgroundColor = this._bgColor;
   };
 
@@ -127,4 +131,6 @@
   };
 
   customElements.define("com-custom-winrate-donut", WinRateDonut);
+  console.log("=== WIDGET DEFINED ===", customElements.get("com-custom-winrate-donut"));
+
 })();
