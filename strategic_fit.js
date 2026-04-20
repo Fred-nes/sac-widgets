@@ -13,7 +13,7 @@
     "</style>" +
     "<div class='w'>" +
     "<div class='t' id='title'>Central KPI: Strategic Fit Score</div>" +
-    "<svg id='svg' viewBox='0 0 220 118' xmlns='http://www.w3.org/2000/svg' style='width:100%;max-height:122px;display:block;'>" +
+    "<svg viewBox='0 0 220 118' xmlns='http://www.w3.org/2000/svg' style='width:100%;max-height:122px;display:block;'>" +
     "<defs>" +
     "<linearGradient id='sfg1' gradientUnits='userSpaceOnUse' x1='30' y1='110' x2='190' y2='110'>" +
     "<stop offset='0%' stop-color='#2B7DE9'/>" +
@@ -24,10 +24,10 @@
     "<path d='M 30 110 A 80 80 0 0 0 190 110' fill='none' stroke='#E2E8F0' stroke-width='20' stroke-linecap='round'/>" +
     "<path id='arc' d='M 30 110 A 80 80 0 0 0 190 110' fill='none' stroke='url(#sfg1)' stroke-width='20' stroke-linecap='round' stroke-dasharray='0 999'/>" +
     "<line id='tick' x1='110' y1='30' x2='110' y2='18' stroke='#111827' stroke-width='3' stroke-linecap='round'/>" +
-    "<text id='score' x='110' y='88' text-anchor='middle' font-size='44' font-weight='700' fill='#1A3053'>0</text>" +
+    "<text id='score' x='110' y='88' text-anchor='middle' font-size='44' font-weight='700' fill='#1A3053'>–</text>" +
     "<text x='110' y='108' text-anchor='middle' font-size='12' fill='#8A9BBE'>/ 100</text>" +
     "</svg>" +
-    "<div class='bd'><span class='bg' id='badge'>–</span></div>" +
+    "<div class='bd'><span class='bg' id='badge' style='background:#E2E8F0;color:#4A5568;'>–</span></div>" +
     "<div class='sm' id='summary'></div>" +
     "</div>";
 
@@ -45,42 +45,64 @@
     this._root = this.attachShadow({ mode: "open" });
     this._root.appendChild(tmpl.content.cloneNode(true));
 
-    this._score      = 0;
-    this._title      = "Central KPI: Strategic Fit Score";
-    this._summary    = "";
-    this._lowThr     = 40;
-    this._highThr    = 70;
+    this._score   = null;
+    this._title   = "Central KPI: Strategic Fit Score";
+    this._summary = "";
+    this._lowThr  = 40;
+    this._highThr = 70;
 
     this._render();
   };
 
   StrategicFitGauge.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
 
-  StrategicFitGauge.prototype.onCustomWidgetAfterUpdate = function (changed) {
-    if (!this._root) return;
-    if (changed.widgetTitle   !== undefined) { this._title   = changed.widgetTitle; }
-    if (changed.summaryText   !== undefined) { this._summary = changed.summaryText; }
-    if (changed.lowThreshold  !== undefined) { this._lowThr  = parseFloat(changed.lowThreshold)  || 40; }
-    if (changed.highThreshold !== undefined) { this._highThr = parseFloat(changed.highThreshold) || 70; }
-
-    if (changed.myDataBinding) {
-      var bd = changed.myDataBinding;
-      if (bd.state !== "loading" && bd.data && bd.data.length > 0) {
-        var row  = bd.data[0];
-        var cell = row["@MeasureDimension"];
-        if (cell && cell.rawValue !== undefined) {
-          this._score = parseFloat(cell.rawValue) || 0;
-        }
+  StrategicFitGauge.prototype._readBinding = function (binding) {
+    if (!binding || binding.state === "loading") return;
+    if (!binding.data || binding.data.length === 0) { return; }
+    var row  = binding.data[0];
+    var cell = row["@MeasureDimension"];
+    var raw  = cell && cell.rawValue !== undefined ? cell.rawValue : null;
+    if (raw === null) {
+      var keys = Object.keys(row);
+      for (var i = 0; i < keys.length; i++) {
+        var c = row[keys[i]];
+        var r = c && c.rawValue !== undefined ? c.rawValue : (c && c.raw !== undefined ? c.raw : c);
+        var n = parseFloat(r);
+        if (!isNaN(n)) { raw = r; break; }
       }
     }
+    var val = parseFloat(raw);
+    if (!isNaN(val)) {
+      this._score = Math.min(100, Math.max(0, val));
+    }
+  };
 
+  StrategicFitGauge.prototype.onCustomWidgetAfterUpdate = function (changed) {
+    if (!this._root) return;
+    if ("widgetTitle"   in changed) { this._title   = changed.widgetTitle; }
+    if ("summaryText"   in changed) { this._summary = changed.summaryText; }
+    if ("lowThreshold"  in changed) { this._lowThr  = parseFloat(changed.lowThreshold)  || 40; }
+    if ("highThreshold" in changed) { this._highThr = parseFloat(changed.highThreshold) || 70; }
+    if ("myDataBinding" in changed) { this._readBinding(changed.myDataBinding); }
     this._render();
   };
 
   StrategicFitGauge.prototype._render = function () {
     if (!this._root) return;
 
-    var score   = this._score;
+    var score = this._score;
+
+    if (score === null) {
+      this._root.getElementById("score").textContent = "–";
+      this._root.getElementById("arc").setAttribute("stroke-dasharray", "0 999");
+      this._root.getElementById("badge").textContent       = "–";
+      this._root.getElementById("badge").style.background  = "#E2E8F0";
+      this._root.getElementById("badge").style.color       = "#4A5568";
+      this._root.getElementById("title").textContent       = this._title;
+      this._root.getElementById("summary").textContent     = this._summary;
+      return;
+    }
+
     var r       = 80;
     var cx      = 110;
     var cy      = 110;
@@ -107,17 +129,17 @@
       rating = "HIGH"; ratingBg = "#DFF5EA"; ratingFg = "#1E8E3E";
     }
 
-    this._root.getElementById("title").textContent                = this._title;
-    this._root.getElementById("score").textContent                = Math.round(score);
+    this._root.getElementById("title").textContent                    = this._title;
+    this._root.getElementById("score").textContent                    = Math.round(score);
     this._root.getElementById("arc").setAttribute("stroke-dasharray", dashArr);
     this._root.getElementById("tick").setAttribute("x1", t1x);
     this._root.getElementById("tick").setAttribute("y1", t1y);
     this._root.getElementById("tick").setAttribute("x2", t2x);
     this._root.getElementById("tick").setAttribute("y2", t2y);
-    this._root.getElementById("badge").textContent                = rating;
-    this._root.getElementById("badge").style.background           = ratingBg;
-    this._root.getElementById("badge").style.color                = ratingFg;
-    this._root.getElementById("summary").textContent              = this._summary;
+    this._root.getElementById("badge").textContent                    = rating;
+    this._root.getElementById("badge").style.background               = ratingBg;
+    this._root.getElementById("badge").style.color                    = ratingFg;
+    this._root.getElementById("summary").textContent                  = this._summary;
   };
 
   customElements.define("com-custom-strategicfit", StrategicFitGauge);
