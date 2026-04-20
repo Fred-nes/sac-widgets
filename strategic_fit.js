@@ -21,8 +21,8 @@
     "<stop offset='100%' stop-color='#25AE6E'/>" +
     "</linearGradient>" +
     "</defs>" +
-    "<path d='M 30 110 A 80 80 0 0 0 190 110' fill='none' stroke='#E2E8F0' stroke-width='20' stroke-linecap='round'/>" +
-    "<path id='arc' d='M 30 110 A 80 80 0 0 0 190 110' fill='none' stroke='url(#sfg1)' stroke-width='20' stroke-linecap='round' stroke-dasharray='0 999'/>" +
+    "<path d='M 30 110 A 80 80 0 0 1 190 110' fill='none' stroke='#E2E8F0' stroke-width='20' stroke-linecap='round'/>" +
+    "<path id='arc' d='M 30 110 A 80 80 0 0 1 190 110' fill='none' stroke='url(#sfg1)' stroke-width='20' stroke-linecap='round' stroke-dasharray='0 999'/>" +
     "<line id='tick' x1='110' y1='30' x2='110' y2='18' stroke='#111827' stroke-width='3' stroke-linecap='round'/>" +
     "<text id='score' x='110' y='88' text-anchor='middle' font-size='44' font-weight='700' fill='#1A3053'>–</text>" +
     "<text x='110' y='108' text-anchor='middle' font-size='12' fill='#8A9BBE'>/ 100</text>" +
@@ -93,7 +93,7 @@
     var score = this._score;
 
     if (score === null) {
-      this._root.getElementById("score").textContent = "–";
+      this._root.getElementById("score").textContent       = "–";
       this._root.getElementById("arc").setAttribute("stroke-dasharray", "0 999");
       this._root.getElementById("badge").textContent       = "–";
       this._root.getElementById("badge").style.background  = "#E2E8F0";
@@ -103,22 +103,24 @@
       return;
     }
 
-    var r       = 80;
-    var cx      = 110;
-    var cy      = 110;
-    var total   = PI * r;
-    var fill    = (score / 100) * total;
-    var dashArr = fill.toFixed(2) + " " + (total + 20).toFixed(2);
+    var r        = 80;
+    var cx       = 110;
+    var cy       = 110;
+    var halfCirc = PI * r;
+    var fullCirc = 2 * PI * r;
+    var fill     = (score / 100) * halfCirc;
+    var dashArr  = fill.toFixed(2) + " " + (fullCirc - fill + 20).toFixed(2);
 
     var t    = score / 100;
-    var cosT = Math.cos(t * PI);
-    var sinT = Math.sin(t * PI);
-    var mx   = cx - r * cosT;
-    var my   = cy - r * sinT;
-    var t1x  = (mx + 5 * cosT).toFixed(1);
-    var t1y  = (my + 5 * sinT).toFixed(1);
-    var t2x  = (mx - 8 * cosT).toFixed(1);
-    var t2y  = (my - 8 * sinT).toFixed(1);
+    var angle = PI * (1 - t);
+    var mx   = cx + r * Math.cos(angle) * -1;
+    var my   = cy - r * Math.sin(angle);
+    var cosA = -Math.cos(angle);
+    var sinA = Math.sin(angle);
+    var t1x  = (mx + 5 * cosA).toFixed(1);
+    var t1y  = (my - 5 * sinA).toFixed(1);
+    var t2x  = (mx - 8 * cosA).toFixed(1);
+    var t2y  = (my + 8 * sinA).toFixed(1);
 
     var rating, ratingBg, ratingFg;
     if (score < this._lowThr) {
