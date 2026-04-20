@@ -1,148 +1,146 @@
 (function () {
-  var PI = Math.PI;
 
   var tmpl = document.createElement("template");
   tmpl.innerHTML =
     "<style>" +
     ":host{display:block;width:100%;height:100%;box-sizing:border-box;}" +
-    ".w{padding:14px 16px;width:100%;height:100%;overflow:hidden;background:#ffffff;}" +
-    ".t{font-size:13px;font-weight:600;color:#1A3053;margin-bottom:4px;line-height:1.4;}" +
-    ".bd{text-align:center;margin-top:2px;margin-bottom:6px;}" +
-    ".bg{border-radius:12px;padding:3px 14px;font-size:11px;font-weight:700;letter-spacing:0.6px;display:inline-block;}" +
-    ".sm{font-size:11px;color:#4A5568;line-height:1.55;}" +
+    ".card{background:#ffffff;border:1px solid #e5e5e5;border-radius:12px;padding:16px;" +
+    "width:100%;height:100%;box-sizing:border-box;cursor:pointer;" +
+    "display:flex;flex-direction:column;gap:8px;position:relative;}" +
+    ".card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);}" +
+    ".header{display:flex;align-items:center;gap:6px;}" +
+    ".header-icon{flex-shrink:0;}" +
+    ".title{font-size:11px;font-weight:600;color:#6a6d70;letter-spacing:0.04em;text-transform:uppercase;}" +
+    ".body{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}" +
+    ".main-value{font-weight:700;color:#1a1a1a;line-height:1.2;}" +
+    ".source{font-size:11px;color:#9a9a9a;margin-top:2px;}" +
+    ".badge{border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;white-space:nowrap;align-self:center;}" +
+    ".edit-icon{position:absolute;bottom:12px;right:12px;opacity:0.3;}" +
+    ".nodata{font-size:11px;color:#b0b0b0;font-style:italic;}" +
     "</style>" +
-    "<div class='w'>" +
-    "<div class='t' id='title'>Central KPI: Strategic Fit Score</div>" +
-    "<svg viewBox='0 0 220 118' xmlns='http://www.w3.org/2000/svg' style='width:100%;max-height:122px;display:block;'>" +
-    "<defs>" +
-    "<linearGradient id='sfg1' gradientUnits='userSpaceOnUse' x1='30' y1='110' x2='190' y2='110'>" +
-    "<stop offset='0%' stop-color='#2B7DE9'/>" +
-    "<stop offset='45%' stop-color='#18A8A5'/>" +
-    "<stop offset='100%' stop-color='#25AE6E'/>" +
-    "</linearGradient>" +
-    "</defs>" +
-    "<path d='M 30 110 A 80 80 0 0 1 190 110' fill='none' stroke='#E2E8F0' stroke-width='20' stroke-linecap='round'/>" +
-    "<path id='arc' d='M 30 110 A 80 80 0 0 1 190 110' fill='none' stroke='url(#sfg1)' stroke-width='20' stroke-linecap='round' stroke-dasharray='0 999'/>" +
-    "<line id='tick' x1='110' y1='30' x2='110' y2='18' stroke='#111827' stroke-width='3' stroke-linecap='round'/>" +
-    "<text id='score' x='110' y='88' text-anchor='middle' font-size='44' font-weight='700' fill='#1A3053'>–</text>" +
-    "<text x='110' y='108' text-anchor='middle' font-size='12' fill='#8A9BBE'>/ 100</text>" +
+    "<div class='card' id='card'>" +
+    "<div class='header'>" +
+    "<svg class='header-icon' width='16' height='16' viewBox='0 0 24 24' fill='none'>" +
+    "<path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2' stroke='#6a6d70' stroke-width='1.5' stroke-linecap='round'/>" +
+    "<circle cx='9' cy='7' r='4' stroke='#6a6d70' stroke-width='1.5'/>" +
+    "<path d='M23 21v-2a4 4 0 0 0-3-3.87' stroke='#6a6d70' stroke-width='1.5' stroke-linecap='round'/>" +
+    "<path d='M16 3.13a4 4 0 0 1 0 7.75' stroke='#6a6d70' stroke-width='1.5' stroke-linecap='round'/>" +
     "</svg>" +
-    "<div class='bd'><span class='bg' id='badge' style='background:#E2E8F0;color:#4A5568;'>–</span></div>" +
-    "<div class='sm' id='summary'></div>" +
+    "<span class='title' id='title'>Customer Classification</span>" +
+    "</div>" +
+    "<div class='body'>" +
+    "<div>" +
+    "<div class='main-value' id='main-value'>–</div>" +
+    "<div class='source' id='source'>SAP Sales Cloud</div>" +
+    "</div>" +
+    "<span class='badge' id='badge' style='display:none;'></span>" +
+    "</div>" +
+    "<div class='nodata' id='nodata' style='display:none;'>Keine Daten</div>" +
+    "<svg class='edit-icon' width='14' height='14' viewBox='0 0 24 24' fill='none'>" +
+    "<path d='M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' stroke='#6a6d70' stroke-width='1.5' stroke-linecap='round'/>" +
+    "<path d='M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z' stroke='#6a6d70' stroke-width='1.5' stroke-linecap='round'/>" +
+    "</svg>" +
     "</div>";
 
-  function StrategicFitGauge() {
+  function CustomerClassification() {
     var instance = HTMLElement.call(this);
     return instance;
   }
 
-  StrategicFitGauge.prototype = Object.create(HTMLElement.prototype);
-  StrategicFitGauge.prototype.constructor = StrategicFitGauge;
+  CustomerClassification.prototype = Object.create(HTMLElement.prototype);
+  CustomerClassification.prototype.constructor = CustomerClassification;
 
-  StrategicFitGauge.prototype.connectedCallback = function () {
+  CustomerClassification.prototype.connectedCallback = function () {
     if (this._init) return;
     this._init = true;
     this._root = this.attachShadow({ mode: "open" });
     this._root.appendChild(tmpl.content.cloneNode(true));
 
-    this._score   = null;
-    this._title   = "Central KPI: Strategic Fit Score";
-    this._summary = "";
-    this._lowThr  = 40;
-    this._highThr = 70;
+    this._mainValue  = null;
+    this._badgeValue = null;
+    this._title      = "Customer Classification";
+    this._source     = "SAP Sales Cloud";
+    this._bgColor    = "#ffffff";
+    this._fontSize   = 28;
+
+    var self = this;
+    this._root.getElementById("card").addEventListener("click", function () {
+      self.dispatchEvent(new CustomEvent("onClick", { bubbles: true }));
+    });
 
     this._render();
   };
 
-  StrategicFitGauge.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
+  CustomerClassification.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
 
-  StrategicFitGauge.prototype._readBinding = function (binding) {
+  CustomerClassification.prototype._readBinding = function (binding) {
     if (!binding || binding.state === "loading") return;
-    if (!binding.data || binding.data.length === 0) { return; }
+    if (!binding.data || binding.data.length === 0) { this._showNoData(true); return; }
     var row  = binding.data[0];
-    var cell = row["@MeasureDimension"];
-    var raw  = cell && cell.rawValue !== undefined ? cell.rawValue : null;
-    if (raw === null) {
-      var keys = Object.keys(row);
-      for (var i = 0; i < keys.length; i++) {
-        var c = row[keys[i]];
-        var r = c && c.rawValue !== undefined ? c.rawValue : (c && c.raw !== undefined ? c.raw : c);
-        var n = parseFloat(r);
-        if (!isNaN(n)) { raw = r; break; }
+    var keys = Object.keys(row);
+    var dims = [];
+
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i] === "@MeasureDimension") continue;
+      var d = row[keys[i]];
+      if (d && (d.description !== undefined || d.id !== undefined)) {
+        dims.push(d.description || d.id || "");
       }
     }
-    var val = parseFloat(raw);
-    if (!isNaN(val)) {
-      this._score = Math.min(100, Math.max(0, val));
-    }
+
+    this._mainValue  = dims[0] !== undefined ? dims[0] : null;
+    this._badgeValue = dims[1] !== undefined ? dims[1] : null;
+    this._showNoData(false);
   };
 
-  StrategicFitGauge.prototype.onCustomWidgetAfterUpdate = function (changed) {
+  CustomerClassification.prototype.onCustomWidgetAfterUpdate = function (changed) {
     if (!this._root) return;
-    if ("widgetTitle"   in changed) { this._title   = changed.widgetTitle; }
-    if ("summaryText"   in changed) { this._summary = changed.summaryText; }
-    if ("lowThreshold"  in changed) { this._lowThr  = parseFloat(changed.lowThreshold)  || 40; }
-    if ("highThreshold" in changed) { this._highThr = parseFloat(changed.highThreshold) || 70; }
+    if ("title"         in changed) { this._title   = changed.title; }
+    if ("sourceLabel"   in changed) { this._source  = changed.sourceLabel; }
+    if ("bgColor"       in changed) { this._bgColor = changed.bgColor; }
+    if ("fontSize"      in changed) { this._fontSize = changed.fontSize; }
     if ("myDataBinding" in changed) { this._readBinding(changed.myDataBinding); }
     this._render();
   };
 
-  StrategicFitGauge.prototype._render = function () {
-    if (!this._root) return;
-
-    var score = this._score;
-
-    if (score === null) {
-      this._root.getElementById("score").textContent       = "–";
-      this._root.getElementById("arc").setAttribute("stroke-dasharray", "0 999");
-      this._root.getElementById("badge").textContent       = "–";
-      this._root.getElementById("badge").style.background  = "#E2E8F0";
-      this._root.getElementById("badge").style.color       = "#4A5568";
-      this._root.getElementById("title").textContent       = this._title;
-      this._root.getElementById("summary").textContent     = this._summary;
-      return;
-    }
-
-    var r        = 80;
-    var cx       = 110;
-    var cy       = 110;
-    var halfCirc = PI * r;
-    var fullCirc = 2 * PI * r;
-    var fill     = (score / 100) * halfCirc;
-    var dashArr  = fill.toFixed(2) + " " + (fullCirc - fill + 20).toFixed(2);
-
-    var t    = score / 100;
-    var angle = PI * (1 - t);
-    var mx   = cx + r * Math.cos(angle) * -1;
-    var my   = cy - r * Math.sin(angle);
-    var cosA = -Math.cos(angle);
-    var sinA = Math.sin(angle);
-    var t1x  = (mx + 5 * cosA).toFixed(1);
-    var t1y  = (my - 5 * sinA).toFixed(1);
-    var t2x  = (mx - 8 * cosA).toFixed(1);
-    var t2y  = (my + 8 * sinA).toFixed(1);
-
-    var rating, ratingBg, ratingFg;
-    if (score < this._lowThr) {
-      rating = "LOW"; ratingBg = "#FDECEA"; ratingFg = "#D93025";
-    } else if (score < this._highThr) {
-      rating = "MEDIUM"; ratingBg = "#FEF3CD"; ratingFg = "#C77700";
-    } else {
-      rating = "HIGH"; ratingBg = "#DFF5EA"; ratingFg = "#1E8E3E";
-    }
-
-    this._root.getElementById("title").textContent                    = this._title;
-    this._root.getElementById("score").textContent                    = Math.round(score);
-    this._root.getElementById("arc").setAttribute("stroke-dasharray", dashArr);
-    this._root.getElementById("tick").setAttribute("x1", t1x);
-    this._root.getElementById("tick").setAttribute("y1", t1y);
-    this._root.getElementById("tick").setAttribute("x2", t2x);
-    this._root.getElementById("tick").setAttribute("y2", t2y);
-    this._root.getElementById("badge").textContent                    = rating;
-    this._root.getElementById("badge").style.background               = ratingBg;
-    this._root.getElementById("badge").style.color                    = ratingFg;
-    this._root.getElementById("summary").textContent                  = this._summary;
+  CustomerClassification.prototype._getBadgeStyle = function (val) {
+    if (!val) return { bg: "#E2E8F0", color: "#4A5568" };
+    var v = val.toString().toLowerCase();
+    if (v === "gold")   return { bg: "#FEF3CD", color: "#C77700" };
+    if (v === "silver") return { bg: "#E8EAED", color: "#5F6B7A" };
+    if (v === "bronze") return { bg: "#F5E6DA", color: "#8B4513" };
+    return { bg: "#E6F1FB", color: "#185FA5" };
   };
 
-  customElements.define("com-custom-strategicfit", StrategicFitGauge);
+  CustomerClassification.prototype._render = function () {
+    if (!this._root) return;
+
+    this._root.getElementById("title").textContent          = this._title;
+    this._root.getElementById("source").textContent         = this._source;
+    this._root.getElementById("card").style.backgroundColor = this._bgColor;
+
+    var mv = this._root.getElementById("main-value");
+    mv.textContent    = this._mainValue || "–";
+    mv.style.fontSize = this._fontSize + "px";
+    mv.style.opacity  = this._mainValue ? "1" : "0.3";
+
+    var badge = this._root.getElementById("badge");
+    if (this._badgeValue) {
+      var s = this._getBadgeStyle(this._badgeValue);
+      badge.textContent      = this._badgeValue;
+      badge.style.display    = "inline-block";
+      badge.style.background = s.bg;
+      badge.style.color      = s.color;
+    } else {
+      badge.style.display = "none";
+    }
+  };
+
+  CustomerClassification.prototype._showNoData = function (show) {
+    if (!this._root) return;
+    this._root.getElementById("nodata").style.display     = show ? "block" : "none";
+    this._root.getElementById("main-value").style.opacity = show ? "0.3" : "1";
+  };
+
+  customElements.define("com-custom-customerclassification", CustomerClassification);
 })();
