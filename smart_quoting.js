@@ -89,18 +89,13 @@
       }
     }
 
-    var cell = row["@MeasureDimension"];
-    var raw  = cell && cell.rawValue !== undefined ? cell.rawValue : null;
-    if (raw === null) {
-      for (var j = 0; j < keys.length; j++) {
-        var c = row[keys[j]];
-        var r = c && c.rawValue !== undefined ? c.rawValue : null;
-        if (r !== null && !isNaN(parseFloat(r))) { raw = r; break; }
-      }
+    var measure = null;
+    if (row["@MeasureDimension"] && row["@MeasureDimension"].rawValue !== undefined) {
+      measure = parseFloat(row["@MeasureDimension"].rawValue);
     }
 
     this._dims    = dims;
-    this._measure = raw !== null ? parseFloat(raw) : null;
+    this._measure = (!isNaN(measure) && measure !== null) ? measure : null;
     this._showNoData(false);
   };
 
