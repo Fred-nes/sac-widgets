@@ -72,35 +72,34 @@
 
   CustomerClassification.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
 
-  CustomerClassification.prototype._readDimension = function (binding) {
-    if (!binding || binding.state === "loading") return null;
-    if (!binding.data || binding.data.length === 0) return null;
+  CustomerClassification.prototype._readBinding = function (binding) {
+    if (!binding || binding.state === "loading") return;
+    if (!binding.data || binding.data.length === 0) { this._showNoData(true); return; }
+
     var row  = binding.data[0];
     var keys = Object.keys(row);
+    var dims = [];
+
     for (var i = 0; i < keys.length; i++) {
       if (keys[i] === "@MeasureDimension") continue;
       var d = row[keys[i]];
       if (d && (d.description !== undefined || d.id !== undefined)) {
-        return d.description || d.id || null;
+        dims.push(d.description || d.id || "");
       }
     }
-    return null;
+
+    if (dims.length >= 1) { this._mainValue  = dims[0]; }
+    if (dims.length >= 2) { this._badgeValue = dims[1]; }
+    this._showNoData(false);
   };
 
   CustomerClassification.prototype.onCustomWidgetAfterUpdate = function (changed) {
     if (!this._root) return;
-    if ("title"                in changed) { this._title   = changed.title; }
-    if ("sourceLabel"          in changed) { this._source  = changed.sourceLabel; }
-    if ("bgColor"              in changed) { this._bgColor = changed.bgColor; }
-    if ("fontSize"             in changed) { this._fontSize = changed.fontSize; }
-    if ("classificationBinding" in changed) {
-      var v = this._readDimension(changed.classificationBinding);
-      if (v !== null) this._mainValue = v;
-    }
-    if ("tierBinding" in changed) {
-      var t = this._readDimension(changed.tierBinding);
-      if (t !== null) this._badgeValue = t;
-    }
+    if ("title"         in changed) { this._title   = changed.title; }
+    if ("sourceLabel"   in changed) { this._source  = changed.sourceLabel; }
+    if ("bgColor"       in changed) { this._bgColor = changed.bgColor; }
+    if ("fontSize"      in changed) { this._fontSize = changed.fontSize; }
+    if ("myDataBinding" in changed) { this._readBinding(changed.myDataBinding); }
     this._render();
   };
 
