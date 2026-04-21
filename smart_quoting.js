@@ -74,7 +74,7 @@
   SmartQuoting.prototype.onCustomWidgetBeforeUpdate = function (changed) {};
 
   SmartQuoting.prototype._readBinding = function (binding) {
-    if (!binding || binding.state === "loading") return;
+    if (!binding) return;
     if (!binding.data || binding.data.length === 0) { this._showNoData(true); return; }
 
     var row  = binding.data[0];
@@ -144,6 +144,3 @@
 
   customElements.define("com-custom-smartquoting", SmartQuoting);
 })();
-
-
-
