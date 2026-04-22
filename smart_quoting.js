@@ -5,42 +5,22 @@
     "<style>" +
     ":host{display:block;width:100%;height:100%;box-sizing:border-box;}" +
     ".card{background:#f5f6f7;border:1px solid #e0e0e0;border-radius:12px;padding:16px 20px;" +
-    "width:100%;height:100%;box-sizing:border-box;cursor:pointer;" +
+    "width:100%;height:100%;box-sizing:border-box;" +
     "display:flex;flex-direction:column;gap:12px;}" +
-    ".card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08);}" +
     ".title{font-size:14px;font-weight:700;color:#1a1a1a;}" +
-    ".row{display:flex;align-items:flex-start;gap:0;width:100%;}" +
+    ".row{display:flex;align-items:flex-start;width:100%;}" +
     ".col{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}" +
-    ".col-label{font-size:11px;color:#6a6d70;font-weight:400;}" +
+    ".col-label{font-size:11px;color:#6a6d70;}" +
     ".col-value{font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
-    ".col-value.currency{color:#1a1a1a;}" +
-    ".nodata{font-size:11px;color:#b0b0b0;font-style:italic;}" +
     "</style>" +
     "<div class='card' id='card'>" +
     "<div class='title' id='title'>Smart Decision Based Quoting</div>" +
     "<div class='row'>" +
-    "<div class='col'>" +
-    "<div class='col-label'>Account</div>" +
-    "<div class='col-value' id='val-account'>–</div>" +
+    "<div class='col'><div class='col-label'>Account</div><div class='col-value' id='v0'>–</div></div>" +
+    "<div class='col'><div class='col-label'>Opportunity</div><div class='col-value' id='v1'>–</div></div>" +
+    "<div class='col'><div class='col-label'>Status</div><div class='col-value' id='v2'>–</div></div>" +
+    "<div class='col'><div class='col-label'>Owner</div><div class='col-value' id='v3'>–</div></div>" +
     "</div>" +
-    "<div class='col'>" +
-    "<div class='col-label'>Opportunity</div>" +
-    "<div class='col-value' id='val-opportunity'>–</div>" +
-    "</div>" +
-    "<div class='col'>" +
-    "<div class='col-label'>Estimated Value</div>" +
-    "<div class='col-value currency' id='val-estimated'>–</div>" +
-    "</div>" +
-    "<div class='col'>" +
-    "<div class='col-label'>Status</div>" +
-    "<div class='col-value' id='val-status'>–</div>" +
-    "</div>" +
-    "<div class='col'>" +
-    "<div class='col-label'>Owner</div>" +
-    "<div class='col-value' id='val-owner'>–</div>" +
-    "</div>" +
-    "</div>" +
-    "<div class='nodata' id='nodata' style='display:none;'>Keine Daten</div>" +
     "</div>";
 
   function SmartQuoting() {
