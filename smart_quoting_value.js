@@ -19,7 +19,7 @@
     "</div>";
 
   function SmartQuotingValue() {
-    var instance = HTMLElement.call(this); // Kommentar
+    var instance = HTMLElement.call(this);
     return instance;
   }
 
