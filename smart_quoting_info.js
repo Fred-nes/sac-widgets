@@ -4,7 +4,7 @@
   tmpl.innerHTML =
     "<style>" +
     ":host{display:block;width:100%;height:100%;box-sizing:border-box;}" +
-    ".card{background:#ffffff;border:1px solid #e0e0e0;border-radius:12px;padding:16px 20px;" +
+    ".card{background:#1h1h1h1;border:1px solid #e0e0e0;border-radius:12px;padding:16px 20px;" +
     "width:100%;height:100%;box-sizing:border-box;" +
     "display:flex;flex-direction:column;gap:12px;}" +
     ".title{font-size:14px;font-weight:700;color:#1a1a1a;}" +
