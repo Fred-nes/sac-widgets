@@ -60,7 +60,23 @@
     if ("bgColor"        in changed) { this._bgColor        = changed.bgColor; }
     if ("fontSize"       in changed) { this._fontSize       = changed.fontSize; }
     if ("currencySymbol" in changed) { this._currencySymbol = changed.currencySymbol; }
-    if ("myDataBinding"  in changed) { this._readBinding(changed.myDataBinding); }
+    if ("myDataBinding"  in changed) {
+      var binding = changed.myDataBinding;
+      if (binding && binding.data && binding.data.length > 0) {
+        this._readBinding(binding);
+      } else {
+        var self = this;
+        try {
+          var ds = this.dataBindings.getDataBinding("myDataBinding").getDataSource();
+          ds.getResultSetData().then(function(d) {
+            if (d && d.length > 0) {
+              self._readBinding({ data: d });
+              self._render();
+            }
+          });
+        } catch(e) {}
+      }
+    }
     this._render();
   };
 
