@@ -208,5 +208,6 @@
     this._root.getElementById("kpi").style.opacity    = show ? "0.3" : "1";
   };
  
-  customElements.define("com-custom-winrate-donut", WinRateDonut);
+  if (!customElements.get("com-custom-winrate-donut")) {
+    customElements.define("com-custom-winrate-donut", WinRateDonut);
 })();
